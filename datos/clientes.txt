@@ -1,0 +1,4 @@
+1001|74125896|Juan|Pérez Rojas|987654321
+1002|45987321|Lucía|Medina Ríos|976543218
+1003|70123456|Carlos Enrique|Vega Ramírez|965432187
+1004|82345678|María Fernanda|Álvarez Soto|954321678

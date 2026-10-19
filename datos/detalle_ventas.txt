@@ -1,0 +1,6 @@
+000127|30002|Cálculo Diferencial|1|70.50|70.50
+000127|30015|Física Universitaria|1|85.00|85.00
+000126|30007|Programación en Java|1|85.00|85.00
+000125|30021|Álgebra Lineal|2|75.00|150.00
+000125|30018|Los ríos profundos|1|45.00|45.00
+000124|30003|Cálculo Integral|1|68.00|68.00

@@ -1,0 +1,2 @@
+admin|admin123|Luis Torres Mendoza|ADMINISTRADOR
+vendedor|venda123|Carlos Ríos Salas|VENDEDOR

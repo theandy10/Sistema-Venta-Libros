@@ -1,0 +1,8 @@
+30002|Cálculo Diferencial|Larson|Matemáticas|5|52.00|70.50|62.00
+30003|Cálculo Integral|Larson|Matemáticas|14|58.00|68.00|60.00
+30007|Programación en Java|Deitel|Programación|9|68.00|85.00|76.00
+30011|Cálculo Vectorial|Marsden|Matemáticas|0|76.00|92.00|82.00
+30015|Física Universitaria|Sears|Física|3|70.00|85.00|76.00
+30018|Los ríos profundos|Munro|Literatura|4|32.00|45.00|39.00
+30021|Álgebra Lineal|Grossman|Matemáticas|2|55.00|75.00|66.00
+30024|Diseño de bases de datos|Elmasri|Sistemas|7|78.00|110.00|98.00
