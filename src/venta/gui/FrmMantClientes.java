@@ -45,7 +45,7 @@ public class FrmMantClientes extends JFrame implements ActionListener {
 
     public FrmMantClientes(Sistema sis) {
         this.sis = sis;
-        setTitle("Mantenimiento · Clientes");
+        setTitle("Gestión · Clientes");
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setSize(new Dimension(1120, 620));
         setLocationRelativeTo(null);
@@ -120,7 +120,7 @@ public class FrmMantClientes extends JFrame implements ActionListener {
         derechaBarra.add(btnVolver);
 
         getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(Estilo.cabecera("Mantenimiento · Clientes", derechaBarra), BorderLayout.NORTH);
+        getContentPane().add(Estilo.cabecera("Gestión · Clientes", derechaBarra), BorderLayout.NORTH);
         getContentPane().add(contenido, BorderLayout.CENTER);
 
         btnAdicionar.addActionListener(this);

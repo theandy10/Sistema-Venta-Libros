@@ -332,7 +332,7 @@ JPanel cabecera = new JPanel(new BorderLayout(0, 8));
         Cliente x = sis.getClientes().buscar(dni);
         if (x == null) {
 aviso("El DNI " + dni + " no está registrado. Use la opción "
-                    + "Venta rápida o registre al cliente desde Mantenimiento.");
+                    + "Venta rápida o registre al cliente desde Gestión.");
             txtDni.setText("");
             return;
         }

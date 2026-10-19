@@ -56,7 +56,7 @@ public class FrmMantLibros extends JFrame implements ActionListener {
 
     public FrmMantLibros(Sistema sis) {
         this.sis = sis;
-        setTitle("Mantenimiento · Libros");
+        setTitle("Gestión · Libros");
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setSize(new Dimension(1120, 620));
         setLocationRelativeTo(null);
@@ -142,7 +142,7 @@ public class FrmMantLibros extends JFrame implements ActionListener {
         derechaBarra.add(btnVolver);
 
         getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(Estilo.cabecera("Mantenimiento · Libros", derechaBarra), BorderLayout.NORTH);
+        getContentPane().add(Estilo.cabecera("Gestión · Libros", derechaBarra), BorderLayout.NORTH);
         getContentPane().add(contenido, BorderLayout.CENTER);
 
         btnAdicionar.addActionListener(this);

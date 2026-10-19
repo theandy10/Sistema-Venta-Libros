@@ -70,7 +70,7 @@ public class FrmInicio extends JFrame implements ActionListener {
 JPanel navegacion = new JPanel(new FlowLayout(FlowLayout.CENTER, 14, 0));
         navegacion.setOpaque(false);
         if (admin) {
-            navegacion.add(itemBarra("Mantenimiento", "navMantenimiento"));
+            navegacion.add(itemBarra("Gestión", "navMantenimiento"));
         }
         navegacion.add(itemBarra("Registro", "navRegistro"));
         navegacion.add(itemBarra("Consulta", "navConsulta"));
@@ -156,7 +156,7 @@ JLabel tituloUltimas = Estilo.etiqueta("Últimas ventas de hoy");
 
 panelConsulta = panelConsulta(admin, btnLibros, btnClientes, btnVentasPropias, btnVentaC);
 
-panelMantenimiento = tarjetaModulo("Mantenimiento",
+        panelMantenimiento = tarjetaModulo("Gestión",
                 "Altas, cambios y bajas de libros y clientes.",
                 new JButton[]{
                     botonModulo("Libros", "Libros", 120),
@@ -431,7 +431,7 @@ modeloUltimas.setRowCount(0);
 
     private void mostrarMantenimiento(String modulo) {
         if (!FrmMantLibros.permitido()) {
-            Estilo.error(this, "El módulo Mantenimiento es solo para el administrador.");
+            Estilo.error(this, "El módulo Gestión es solo para el administrador.");
             return;
         }
         sis.grabarTodo();
