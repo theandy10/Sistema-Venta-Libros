@@ -62,9 +62,9 @@ public class Acceso {
         }
         if (usuarios.isEmpty()) {
             usuarios.add(new Usuario("admin", "admin123",
-                    "Luis Torres Mendoza", Sesion.ADMINISTRADOR));
+                    "Ander Vasquez Llatas", Sesion.ADMINISTRADOR));
             usuarios.add(new Usuario("vendedor", "venta123",
-                    "Carlos Rios Salas", Sesion.VENDEDOR));
+                    "Alysson Estela Gallardo", Sesion.VENDEDOR));
             grabar();
         }
     }

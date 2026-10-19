@@ -1,2 +1,2 @@
-admin|admin123|Luis Torres Mendoza|ADMINISTRADOR
-vendedor|venda123|Carlos Ríos Salas|VENDEDOR
+admin|admin123|Ander Vasquez Llatas|ADMINISTRADOR
+vendedor|venda123|Alysson Estela Gallardo|VENDEDOR
