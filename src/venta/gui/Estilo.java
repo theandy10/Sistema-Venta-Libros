@@ -404,7 +404,7 @@ public static DefaultTableModel modelo(String[] columnas) {
     }
 
     public static void info(java.awt.Component padre, String contenido) {
-        JOptionPane.showMessageDialog(padre, contenido, "Libreria Virtual",
+        JOptionPane.showMessageDialog(padre, contenido, "Book Center",
                 JOptionPane.INFORMATION_MESSAGE);
     }
 

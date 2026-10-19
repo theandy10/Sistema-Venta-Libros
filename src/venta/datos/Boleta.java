@@ -29,7 +29,7 @@ public final class Boleta {
         StringBuilder sb = new StringBuilder();
         int unidades = 0;
 
-        sb.append(centro("LIBRERIA VIRTUAL", ANCHO)).append('\n');
+        sb.append(centro("BOOK CENTER", ANCHO)).append('\n');
         sb.append(centro("Sistema de venta de libros", ANCHO)).append('\n');
         sb.append(linea('=')).append('\n');
         sb.append(centro("BOLETA DE VENTA N. " + v.numeroTexto(), ANCHO)).append('\n');

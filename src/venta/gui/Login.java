@@ -36,13 +36,13 @@ public class Login extends JFrame implements ActionListener {
     public Login(Sistema sis) {
         this.sis = sis;
         this.acceso = new Acceso(sis.getCarpeta());
-        setTitle("Librería Virtual · Iniciar sesión");
+        setTitle("Book Center · Iniciar sesión");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(new Dimension(460, 420));
         setLocationRelativeTo(null);
         setResizable(false);
 
-        JLabel lblSistema = new JLabel("Librería Virtual", JLabel.CENTER);
+        JLabel lblSistema = new JLabel("Book Center", JLabel.CENTER);
         lblSistema.setFont(new Font(Estilo.FUENTE, Font.BOLD, 30));
         lblSistema.setForeground(Estilo.ACENTO);
         JLabel lblSub = new JLabel("Sistema de venta de libros", JLabel.CENTER);

@@ -56,7 +56,7 @@ public class FrmInicio extends JFrame implements ActionListener {
 
     public FrmInicio(Sistema sis) {
         this.sis = sis;
-        setTitle("Librería Virtual");
+        setTitle("Book Center");
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setSize(new Dimension(1180, 720));
         setLocationRelativeTo(null);
@@ -66,7 +66,7 @@ public class FrmInicio extends JFrame implements ActionListener {
         String filtroUsuario = admin ? null : Sesion.codigo();
 
         JPanel barra = Estilo.barra();
-        barra.add(Estilo.deBarra("Librería Virtual", 20, true), BorderLayout.WEST);
+        barra.add(Estilo.deBarra("Book Center", 20, true), BorderLayout.WEST);
 JPanel navegacion = new JPanel(new FlowLayout(FlowLayout.CENTER, 14, 0));
         navegacion.setOpaque(false);
         if (admin) {

@@ -1,4 +1,4 @@
-# Sistema de Venta de Libros - Libreria Virtual
+# Book Center - Sistema de Venta de Libros
 
 Proyecto de investigacion aplicada del curso **Algoritmos y Estructura de Datos** (Cibertec). Sistema de escritorio en Java (Swing) para la gestion comercial de una libreria: catalogo de libros, clientes, ventas con detalle, cobro, boleta y reportes.
 
