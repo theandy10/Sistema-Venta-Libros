@@ -34,7 +34,7 @@ public class FrmReporte extends JFrame implements ActionListener {
     private static final long serialVersionUID = 1L;
 
     private static final String[] TIPOS = {
-        "Ventas por dia", "Stock bajo", "Libros mas vendidos",
+        "Ventas por dia", "Cuadre de caja", "Stock bajo", "Libros mas vendidos",
         "Ventas por cliente", "Ingresos por categoria"};
 
     private final Sistema sis;
@@ -128,7 +128,7 @@ public class FrmReporte extends JFrame implements ActionListener {
         ActionListener aplicarFecha = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if ("Ventas por dia".equals(cmbTipo.getSelectedItem())) {
+                if (usaFechas((String) cmbTipo.getSelectedItem())) {
                     generar();
                 }
             }
@@ -139,6 +139,10 @@ public class FrmReporte extends JFrame implements ActionListener {
     }
 
     private static String[] columnas(String tipo) {
+        if (tipo.equals("Cuadre de caja")) {
+            return new String[]{"Metodo de pago", "Ventas",
+                "Monto pagado", "Vuelto", "Total vendido"};
+        }
         if (tipo.equals("Stock bajo")) {
             return new String[]{"Libro", "Autor", "Stock", "Codigo"};
         }
@@ -154,10 +158,14 @@ public class FrmReporte extends JFrame implements ActionListener {
         return new String[]{"N.", "Fecha", "Hora", "Cliente", "Metodo", "Total"};
     }
 
+    private static boolean usaFechas(String tipo) {
+        return "Ventas por dia".equals(tipo) || "Cuadre de caja".equals(tipo);
+    }
+
     private void cambiarReporte() {
         String tipo = (String) cmbTipo.getSelectedItem();
         panelFiltros.removeAll();
-        if (tipo.equals("Ventas por dia")) {
+        if (usaFechas(tipo)) {
             panelFiltros.add(lblDesde);
             panelFiltros.add(txtDesde);
             panelFiltros.add(lblHasta);
@@ -171,7 +179,11 @@ public class FrmReporte extends JFrame implements ActionListener {
 
         modelo = Estilo.modelo(columnas(tipo));
         tabla.setModel(modelo);
-        Estilo.alinearDerecha(tabla, columnaMonto(tipo));
+        if (tipo.equals("Cuadre de caja")) {
+            Estilo.alinearDerecha(tabla, 2, 3, 4);
+        } else {
+            Estilo.alinearDerecha(tabla, columnaMonto(tipo));
+        }
         lblTotal.setText(" ");
         generar();
     }
@@ -202,6 +214,8 @@ public class FrmReporte extends JFrame implements ActionListener {
         modelo.setRowCount(0);
         if (tipo.equals("Ventas por dia")) {
             reporteVentasPorDia();
+        } else if (tipo.equals("Cuadre de caja")) {
+            reporteCuadreCaja();
         } else if (tipo.equals("Stock bajo")) {
             reporteStockBajo();
         } else if (tipo.equals("Libros mas vendidos")) {
@@ -223,24 +237,31 @@ public class FrmReporte extends JFrame implements ActionListener {
         return 2;
     }
 
-    private void reporteVentasPorDia() {
+    private ArrayList<Venta> ventasDelRango() {
         String desde = Validador.limpio(txtDesde.getText());
         String hasta = Validador.limpio(txtHasta.getText());
         if (!desde.isEmpty() && !Fecha.esFecha(desde)) {
             Estilo.error(this, "La fecha inicial no tiene el formato dd/mm/aaaa.");
-            return;
+            return null;
         }
         if (!hasta.isEmpty() && !Fecha.esFecha(hasta)) {
             Estilo.error(this, "La fecha final no tiene el formato dd/mm/aaaa.");
-            return;
+            return null;
         }
         LocalDate f1 = Fecha.aFecha(desde);
         LocalDate f2 = Fecha.aFecha(hasta);
         if (f1 != null && f2 != null && f1.isAfter(f2)) {
             Estilo.error(this, "La fecha inicial no puede ser mayor que la fecha final.");
+            return null;
+        }
+        return sis.getReporte().ventasPorDia(desde, hasta);
+    }
+
+    private void reporteVentasPorDia() {
+        ArrayList<Venta> lista = ventasDelRango();
+        if (lista == null) {
             return;
         }
-        ArrayList<Venta> lista = sis.getReporte().ventasPorDia(desde, hasta);
         for (int i = 0; i < lista.size(); i++) {
             Venta v = lista.get(i);
             Cliente c = v.clienteRegistrado()
@@ -253,6 +274,38 @@ public class FrmReporte extends JFrame implements ActionListener {
         lblTotal.setText(lista.isEmpty()
                 ? "No hay ventas en el rango indicado."
                 : lista.size() + " venta(s) · total " + Dinero.soles(sis.getReporte().totalVentas(lista)));
+    }
+
+    private void reporteCuadreCaja() {
+        ArrayList<Venta> lista = ventasDelRango();
+        if (lista == null) {
+            return;
+        }
+        ArrayList<ReporteVentas.FilaCuadre> filas = sis.getReporte().cuadreCaja(lista);
+        int totalVentas = 0;
+        BigDecimal totalPagado = Dinero.CERO;
+        BigDecimal totalVuelto = Dinero.CERO;
+        BigDecimal totalGeneral = Dinero.CERO;
+        BigDecimal efectivo = Dinero.CERO;
+        for (int i = 0; i < filas.size(); i++) {
+            ReporteVentas.FilaCuadre f = filas.get(i);
+            modelo.addRow(new Object[]{
+                f.getMetodo(), f.getVentas(), Dinero.texto(f.getMontoPagado()),
+                Dinero.texto(f.getVuelto()), Dinero.texto(f.getTotal())});
+            totalVentas += f.getVentas();
+            totalPagado = Dinero.suma(totalPagado, f.getMontoPagado());
+            totalVuelto = Dinero.suma(totalVuelto, f.getVuelto());
+            totalGeneral = Dinero.suma(totalGeneral, f.getTotal());
+            if (Venta.EFECTIVO.equals(f.getMetodo())) {
+                efectivo = f.getTotal();
+            }
+        }
+        modelo.addRow(new Object[]{"TOTAL", totalVentas, Dinero.texto(totalPagado),
+            Dinero.texto(totalVuelto), Dinero.texto(totalGeneral)});
+        lblTotal.setText(lista.isEmpty()
+                ? "No hay ventas en el rango indicado."
+                : totalVentas + " venta(s) · total " + Dinero.soles(totalGeneral)
+                + " · efectivo en caja " + Dinero.soles(efectivo));
     }
 
     private void reporteStockBajo() {

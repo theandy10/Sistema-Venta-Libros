@@ -65,6 +65,7 @@ private final JLabel lblMensaje;
     private final JButton btnQuitar;
 
     private Runnable alRegistrar;
+    private boolean escribiendoMonto;
 
     public PanelVenta(Sistema sis) {
         this.sis = sis;
@@ -190,17 +191,23 @@ JPanel cabecera = new JPanel(new BorderLayout(0, 8));
         DocumentListener recalculo = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                recalcular();
+                if (!escribiendoMonto) {
+                    recalcular();
+                }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                recalcular();
+                if (!escribiendoMonto) {
+                    recalcular();
+                }
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                recalcular();
+                if (!escribiendoMonto) {
+                    recalcular();
+                }
             }
         };
         txtDescuento.getDocument().addDocumentListener(recalculo);
@@ -215,11 +222,13 @@ JPanel cabecera = new JPanel(new BorderLayout(0, 8));
         cmbPago.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() != ItemEvent.SELECTED) {
+                    return;
+                }
                 boolean efectivo = cmbPago.esEfectivo();
                 txtMontoPagado.setEditable(efectivo);
                 if (!efectivo) {
-
-                    txtMontoPagado.setText(Dinero.texto(totalActual()));
+                    escribirMontoPagado(Dinero.texto(totalActual()));
                 }
                 recalcular();
             }
@@ -257,7 +266,7 @@ JPanel cabecera = new JPanel(new BorderLayout(0, 8));
         txtNombre.setText("");
         txtCelular.setText("");
         txtDescuento.setText("");
-        txtMontoPagado.setText("");
+        escribirMontoPagado("");
         cmbPago.setSelectedIndex(0);
         modeloDetalle.setRowCount(0);
         recalcular();
@@ -523,6 +532,15 @@ private void listarDetalle() {
         recalcular();
     }
 
+    private void escribirMontoPagado(String texto) {
+        escribiendoMonto = true;
+        try {
+            txtMontoPagado.setText(texto);
+        } finally {
+            escribiendoMonto = false;
+        }
+    }
+
     private BigDecimal subtotalActual() {
         BigDecimal t = Dinero.CERO;
         for (int i = 0; i < detalle.size(); i++) {
@@ -546,8 +564,8 @@ private void listarDetalle() {
         BigDecimal total = totalActual();
         txtSubtotal.setText(Dinero.texto(subtotal));
         txtTotal.setText(Dinero.texto(total));
-if (!cmbPago.esEfectivo()) {
-            txtMontoPagado.setText(Dinero.texto(total));
+        if (!cmbPago.esEfectivo()) {
+            escribirMontoPagado(Dinero.texto(total));
             txtVuelto.setText(Dinero.texto(Dinero.CERO));
             txtVuelto.setFont(new Font(Estilo.FUENTE, Font.PLAIN, Estilo.TAMANO));
             return;

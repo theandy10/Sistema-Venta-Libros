@@ -49,6 +49,7 @@ public class FrmInicio extends JFrame implements ActionListener {
     private final JPanel panelStockBajo;
     private final JButton btnMisVentas;
     private final JButton btnReporteVentasPorDia;
+    private final JButton btnReporteCuadreCaja;
     private final JButton btnReporteStockBajo;
     private final JButton btnReporteMasVendidos;
     private final JButton btnReporteCategoria;
@@ -150,6 +151,7 @@ JLabel tituloUltimas = Estilo.etiqueta("Últimas ventas de hoy");
         JButton btnVentaC = botonModulo("Ventas", "Ventas");
         JButton btnVentasPropias = botonModulo("Mis ventas", "Mis ventas");
         btnReporteVentasPorDia = botonModulo("Ventas por día", "Ventas por día", 0);
+        btnReporteCuadreCaja = botonModulo("Cuadre de caja", "Cuadre de caja", 0);
         btnReporteStockBajo = botonModulo("Stock bajo", "Stock bajo", 0);
         btnReporteMasVendidos = botonModulo("Más vendidos", "Más vendidos", 0);
         btnReporteCategoria = botonModulo("Ingresos por categoría", "Ingresos por categoría", 0);
@@ -166,7 +168,7 @@ panelConsulta = panelConsulta(admin, btnLibros, btnClientes, btnVentasPropias, b
         panelReporte = tarjetaModulo("Reporte",
                 "Resúmenes de ventas, de stock y de títulos.",
                 new JButton[]{
-                    btnReporteVentasPorDia, btnReporteStockBajo,
+                    btnReporteVentasPorDia, btnReporteCuadreCaja, btnReporteStockBajo,
                     btnReporteMasVendidos, btnReporteCategoria}, 2);
 
         modeloStock = Estilo.modelo(new String[]{"Libro", "Stock"});
@@ -411,7 +413,8 @@ modeloUltimas.setRowCount(0);
                 break;
             case "Ventas":
             case "Mis ventas":
-                case "Ventas por día":
+            case "Ventas por día":
+            case "Cuadre de caja":
             case "Stock bajo":
             case "Más vendidos":
             case "Ingresos por categoría":
@@ -464,6 +467,9 @@ modeloUltimas.setRowCount(0);
     }
 
     private static String tipoReporte(String comando) {
+        if ("Cuadre de caja".equals(comando)) {
+            return "Cuadre de caja";
+        }
         if ("Stock bajo".equals(comando)) {
             return "Stock bajo";
         }

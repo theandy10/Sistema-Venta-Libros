@@ -58,6 +58,43 @@ public class ReporteVentas {
         }
     }
 
+    public static class FilaCuadre {
+        private final String metodo;
+        private final int ventas;
+        private final BigDecimal montoPagado;
+        private final BigDecimal vuelto;
+        private final BigDecimal total;
+
+        public FilaCuadre(String metodo, int ventas, BigDecimal montoPagado,
+                          BigDecimal vuelto, BigDecimal total) {
+            this.metodo = metodo;
+            this.ventas = ventas;
+            this.montoPagado = Dinero.escala(montoPagado);
+            this.vuelto = Dinero.escala(vuelto);
+            this.total = Dinero.escala(total);
+        }
+
+        public String getMetodo() {
+            return metodo;
+        }
+
+        public int getVentas() {
+            return ventas;
+        }
+
+        public BigDecimal getMontoPagado() {
+            return montoPagado;
+        }
+
+        public BigDecimal getVuelto() {
+            return vuelto;
+        }
+
+        public BigDecimal getTotal() {
+            return total;
+        }
+    }
+
     private final ArregloLibros arrLib;
     private final ArregloClientes arrCli;
     private final ArregloVentas arrVen;
@@ -73,6 +110,43 @@ public class ReporteVentas {
 
     public ArrayList<Venta> ventasPorDia(String desde, String hasta) {
         return arrVen.ventasEntre(desde, hasta);
+    }
+
+    public ArrayList<FilaCuadre> cuadreCaja(String desde, String hasta) {
+        return cuadreCaja(arrVen.ventasEntre(desde, hasta));
+    }
+
+    public ArrayList<FilaCuadre> cuadreCaja(ArrayList<Venta> lista) {
+        ArrayList<String> metodos = new ArrayList<String>();
+        metodos.add(Venta.EFECTIVO);
+        metodos.add("TARJETA");
+        metodos.add("YAPE / PLIN");
+        for (int i = 0; i < lista.size(); i++) {
+            String m = lista.get(i).getMetodo();
+            if (m != null && !metodos.contains(m)) {
+                metodos.add(m);
+            }
+        }
+        ArrayList<FilaCuadre> r = new ArrayList<FilaCuadre>();
+        for (int m = 0; m < metodos.size(); m++) {
+            String metodo = metodos.get(m);
+            int ventas = 0;
+            BigDecimal pagado = Dinero.CERO;
+            BigDecimal vuelto = Dinero.CERO;
+            BigDecimal total = Dinero.CERO;
+            for (int i = 0; i < lista.size(); i++) {
+                Venta v = lista.get(i);
+                if (!metodo.equals(v.getMetodo())) {
+                    continue;
+                }
+                ventas++;
+                pagado = Dinero.suma(pagado, v.getMontoPagado());
+                vuelto = Dinero.suma(vuelto, v.getVuelto());
+                total = Dinero.suma(total, v.getTotal());
+            }
+            r.add(new FilaCuadre(metodo, ventas, pagado, vuelto, total));
+        }
+        return r;
     }
 
     public BigDecimal totalVentas(ArrayList<Venta> lista) {

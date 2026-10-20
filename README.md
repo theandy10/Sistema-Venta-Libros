@@ -9,7 +9,7 @@ Proyecto de investigacion aplicada del curso **Algoritmos y Estructura de Datos*
 - Anulacion de ventas con devolucion de stock.
 - Consulta de libros, clientes y ventas con sugerencias al escribir.
 - Boleta de venta en texto, con IGV incluido, guardada en `datos/boletas/` e imprimible.
-- Reportes: ventas por dia, stock minimo, libros mas vendidos, ventas por cliente e ingresos por categoria.
+- Reportes (administrador): ventas por dia, cuadre de caja, stock minimo, libros mas vendidos, ventas por cliente e ingresos por categoria.
 - Persistencia en archivos de texto dentro de `datos/`.
 
 ## Requisitos
