@@ -60,6 +60,12 @@ public class FrmMantLibros extends JFrame implements ActionListener {
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setSize(new Dimension(1120, 620));
         setLocationRelativeTo(null);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                sis.grabarTodo();
+            }
+        });
 
         txtCodigo = Estilo.soloLectura(10);
         cboGenero = Estilo.combo(GENEROS);

@@ -52,6 +52,7 @@ public class FrmConsulta extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
 
         txtLibro = campoConSugerencias(sis.getLibros().paraSugerencias());
+        prepararCampo(txtLibro, "Buscar libro");
         areaLibro = area();
         lblStockLibro = new JLabel(" ");
         lblStockLibro.setFont(new Font(Estilo.FUENTE, Font.BOLD, 13));
@@ -61,10 +62,12 @@ public class FrmConsulta extends JFrame implements ActionListener {
         lblStockLibro.setVisible(false);
 
         txtCliente = campoConSugerencias(sis.getClientes().paraSugerencias());
+        prepararCampo(txtCliente, "Buscar cliente");
         areaCliente = area();
         modeloCompras = Estilo.modelo(new String[]{"Venta", "Fecha", "Hora", "Total"});
 
         txtVenta = campoConSugerencias(sis.getVentas().paraSugerencias());
+        prepararCampo(txtVenta, "Buscar venta");
         areaVenta = area();
         modeloDetalle = Estilo.modelo(
                 new String[]{"Código", "Descripción", "Cantidad", "P. unitario", "Subtotal"});
@@ -108,17 +111,27 @@ public class FrmConsulta extends JFrame implements ActionListener {
             aMostrar.add(pares.get(i)[1]);
         }
         campo.setSugerencias(aMostrar, aEscribir);
-        campo.setAlElegir(new Runnable() {
-            @Override
-            public void run() {
-                buscar();
-            }
-        });
         return campo;
     }
 
-    private JButton botonBuscar(String texto) {
+    private void prepararCampo(final CampoSugerido campo, final String comando) {
+        campo.setAlElegir(new Runnable() {
+            @Override
+            public void run() {
+                ejecutarBusqueda(comando);
+            }
+        });
+        campo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ejecutarBusqueda(comando);
+            }
+        });
+    }
+
+    private JButton botonBuscar(String texto, String comando) {
         JButton b = Estilo.primario(texto);
+        b.setActionCommand(comando);
         b.addActionListener(this);
         return b;
     }
@@ -136,7 +149,7 @@ public class FrmConsulta extends JFrame implements ActionListener {
         JPanel p = new JPanel(new BorderLayout(0, 10));
         p.setBackground(Estilo.FONDO);
         p.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-        p.add(barraBusqueda("Código del libro:", txtLibro, botonBuscar("Buscar")), BorderLayout.NORTH);
+        p.add(barraBusqueda("Código del libro:", txtLibro, botonBuscar("Buscar", "Buscar libro")), BorderLayout.NORTH);
         JPanel datos = Estilo.tarjeta("Datos del libro");
         datos.setLayout(new BorderLayout(0, 8));
         datos.add(Estilo.scroll(areaLibro), BorderLayout.CENTER);
@@ -149,7 +162,7 @@ public class FrmConsulta extends JFrame implements ActionListener {
         JPanel p = new JPanel(new BorderLayout(0, 10));
         p.setBackground(Estilo.FONDO);
         p.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-        p.add(barraBusqueda("DNI del cliente:", txtCliente, botonBuscar("Buscar")), BorderLayout.NORTH);
+        p.add(barraBusqueda("DNI del cliente:", txtCliente, botonBuscar("Buscar", "Buscar cliente")), BorderLayout.NORTH);
         JPanel centro = new JPanel(new BorderLayout(0, 10));
         centro.setOpaque(false);
         JPanel datos = Estilo.tarjeta("Datos del cliente");
@@ -170,7 +183,7 @@ public class FrmConsulta extends JFrame implements ActionListener {
         JPanel p = new JPanel(new BorderLayout(0, 10));
         p.setBackground(Estilo.FONDO);
         p.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-        p.add(barraBusqueda("Número de venta:", txtVenta, botonBuscar("Buscar")), BorderLayout.NORTH);
+        p.add(barraBusqueda("Número de venta:", txtVenta, botonBuscar("Buscar", "Buscar venta")), BorderLayout.NORTH);
         JPanel centro = new JPanel(new BorderLayout(0, 10));
         centro.setOpaque(false);
         JPanel datos = Estilo.tarjeta("Datos de la venta");
@@ -193,8 +206,10 @@ public class FrmConsulta extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         switch (cmd) {
-            case "Buscar":
-                buscar();
+            case "Buscar libro":
+            case "Buscar cliente":
+            case "Buscar venta":
+                ejecutarBusqueda(cmd);
                 break;
             case "Volver":
                 sis.grabarTodo();
@@ -205,23 +220,26 @@ public class FrmConsulta extends JFrame implements ActionListener {
         }
     }
 
-    private void buscar() {
-        if (!Validador.vacio(txtLibro.getText())) {
+    private void ejecutarBusqueda(String comando) {
+        if ("Buscar libro".equals(comando)) {
             consultarLibro();
-        } else if (!Validador.vacio(txtCliente.getText())) {
+        } else if ("Buscar cliente".equals(comando)) {
             consultarCliente();
-        } else if (!Validador.vacio(txtVenta.getText())) {
+        } else if ("Buscar venta".equals(comando)) {
             consultarVenta();
-        } else {
-            Estilo.error(this, "Escriba un dato de búsqueda en la pestaña correspondiente.");
         }
     }
 
     private void consultarLibro() {
         String dato = Validador.limpio(txtLibro.getText());
+        if (dato.isEmpty()) {
+            areaLibro.setText("Escriba el código o el nombre del libro.");
+            lblStockLibro.setVisible(false);
+            return;
+        }
         Libro x = null;
         if (dato.matches("\\d+")) {
-            x = sis.getLibros().buscar(Integer.parseInt(dato));
+            x = sis.getLibros().buscar(Validador.entero(dato, -1));
         }
         if (x == null) {
             x = sis.getLibros().buscarPorNombre(dato);
@@ -247,6 +265,11 @@ public class FrmConsulta extends JFrame implements ActionListener {
 
     private void consultarCliente() {
         String dato = Validador.limpio(txtCliente.getText());
+        if (dato.isEmpty()) {
+            areaCliente.setText("Escriba el DNI del cliente.");
+            modeloCompras.setRowCount(0);
+            return;
+        }
         Cliente c = Validador.dni(dato) ? sis.getClientes().buscar(dato) : null;
         if (c == null) {
             areaCliente.setText("El cliente no está registrado.");
@@ -271,12 +294,17 @@ public class FrmConsulta extends JFrame implements ActionListener {
 
     private void consultarVenta() {
         String dato = Validador.limpio(txtVenta.getText());
-        if (!dato.matches("\\d+")) {
-            areaVenta.setText("El número de venta debe ser un número.");
+        if (dato.isEmpty()) {
+            areaVenta.setText("Escriba el número de venta.");
             modeloDetalle.setRowCount(0);
             return;
         }
-        Venta v = sis.getVentas().buscar(Integer.parseInt(dato));
+        if (!Validador.esEntero(dato)) {
+            areaVenta.setText("El número de venta debe ser un número entero válido.");
+            modeloDetalle.setRowCount(0);
+            return;
+        }
+        Venta v = sis.getVentas().buscar(Validador.entero(dato, -1));
         if (v == null) {
             areaVenta.setText("La venta N. " + dato + " no existe.");
             modeloDetalle.setRowCount(0);

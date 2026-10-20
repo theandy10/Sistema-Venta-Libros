@@ -3,11 +3,13 @@ package venta.datos;
 import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
 import venta.modelo.Venta;
 import venta.modelo.DetalleVenta;
+import venta.modelo.Libro;
 import venta.util.Archivo;
 import venta.util.Dinero;
 import venta.util.Fecha;
@@ -17,11 +19,15 @@ public class ArregloVentas {
 
     private ArrayList<Venta> ven;
     private final String archivo;
+    private final String contador;
     private final ArregloLibros arrLib;
     private final ArregloDetalle arrDet;
 
+    private int ultimoNumero;
+
     public ArregloVentas(String carpeta, ArregloLibros arrLib, ArregloDetalle arrDet) {
         this.archivo = carpeta + File.separator + "ventas.txt";
+        this.contador = carpeta + File.separator + "numero_venta.txt";
         this.arrLib = arrLib;
         this.arrDet = arrDet;
         this.ven = new ArrayList<Venta>();
@@ -31,6 +37,13 @@ public class ArregloVentas {
     public Venta registrar(String usuario, String dni, ArrayList<DetalleVenta> detalle,
                             String fecha, String hora, BigDecimal descuento,
                             String metodo, BigDecimal montoPagado) {
+        for (int i = 0; i < detalle.size(); i++) {
+            DetalleVenta d = detalle.get(i);
+            Libro x = arrLib.buscar(d.getCodigoLibro());
+            if (x == null || d.getCantidad() > x.getStock()) {
+                return null;
+            }
+        }
         int numero = generarNumero();
         BigDecimal bruto = arrDet.sumaSubtotales(detalle);
         for (int i = 0; i < detalle.size(); i++) {
@@ -40,6 +53,7 @@ public class ArregloVentas {
         }
         Venta x = new Venta(numero, fecha, hora, usuario, dni, bruto, descuento, metodo, montoPagado);
         ven.add(x);
+        ultimoNumero = numero;
         for (int i = 0; i < detalle.size(); i++) {
             arrLib.descontarStock(detalle.get(i).getCodigoLibro(), detalle.get(i).getCantidad());
         }
@@ -61,13 +75,7 @@ public class ArregloVentas {
     }
 
     public int generarNumero() {
-        int max = 0;
-        for (int i = 0; i < ven.size(); i++) {
-            if (ven.get(i).getNumero() > max) {
-                max = ven.get(i).getNumero();
-            }
-        }
-        return max + 1;
+        return ultimoNumero + 1;
     }
 
     public Venta buscar(int numero) {
@@ -232,6 +240,23 @@ public class ArregloVentas {
 
             }
         }
+        ultimoNumero = 0;
+        for (int i = 0; i < ven.size(); i++) {
+            if (ven.get(i).getNumero() > ultimoNumero) {
+                ultimoNumero = ven.get(i).getNumero();
+            }
+        }
+        List<String> guardado = Archivo.leer(contador);
+        if (!guardado.isEmpty()) {
+            try {
+                int n = Integer.parseInt(guardado.get(0).trim());
+                if (n > ultimoNumero) {
+                    ultimoNumero = n;
+                }
+            } catch (NumberFormatException e) {
+
+            }
+        }
     }
 
     public boolean grabar() {
@@ -251,7 +276,10 @@ public class ArregloVentas {
                     Dinero.texto(v.getMontoPagado()),
                     Dinero.texto(v.getVuelto())));
         }
-        return Archivo.escribir(archivo, lineas);
+        boolean ventasOk = Archivo.escribir(archivo, lineas);
+        boolean contadorOk = Archivo.escribir(contador,
+                Collections.singletonList(String.valueOf(ultimoNumero)));
+        return ventasOk && contadorOk;
     }
 
     public String getArchivo() {

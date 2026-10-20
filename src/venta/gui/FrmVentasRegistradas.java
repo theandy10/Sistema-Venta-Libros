@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -28,6 +29,7 @@ import venta.modelo.Cliente;
 import venta.modelo.DetalleVenta;
 import venta.modelo.Venta;
 import venta.util.Dinero;
+import venta.util.Fecha;
 import venta.util.Validador;
 
 public class FrmVentasRegistradas extends JFrame implements ActionListener {
@@ -38,8 +40,8 @@ public class FrmVentasRegistradas extends JFrame implements ActionListener {
     private final FrmRegistroVentas padre;
 
     private final JTextField txtNumero;
-    private final JTextField txtDesde;
-    private final JTextField txtHasta;
+    private final SelectorFecha txtDesde;
+    private final SelectorFecha txtHasta;
     private final DefaultTableModel modeloVentas;
     private final JTable tablaVentas;
     private final JLabel lblTotal;
@@ -67,8 +69,9 @@ public class FrmVentasRegistradas extends JFrame implements ActionListener {
         setSize(new Dimension(1180, 680));
 
         txtNumero = Estilo.campo(10);
-        txtDesde = Estilo.campo(10);
-        txtHasta = Estilo.campo(10);
+        txtDesde = new SelectorFecha(10);
+        txtHasta = new SelectorFecha(10);
+        JButton btnBuscar = Estilo.primario("Buscar");
         JButton btnTodas = Estilo.secundario("Ver todas");
 
 modeloVentas = Estilo.modelo(new String[]{"N.", "Fecha", "Hora", "Cliente", "Metodo", "Total"});
@@ -89,11 +92,15 @@ JPanel filtros = Estilo.tarjeta("Buscar ventas");
 
         JPanel campos = Estilo.columna(
                 Estilo.fila("Número de venta", txtNumero, 260),
-                Estilo.fila("Desde (dd/mm/aaaa)", txtDesde, 260),
-                Estilo.fila("Hasta (dd/mm/aaaa)", txtHasta, 260));
+                Estilo.fila("Desde", txtDesde, 260),
+                Estilo.fila("Hasta", txtHasta, 260));
+        JPanel botonesFiltro = new JPanel(new GridLayout(2, 1, 0, 6));
+        botonesFiltro.setOpaque(false);
+        botonesFiltro.add(btnBuscar);
+        botonesFiltro.add(btnTodas);
         JPanel todas = new JPanel(new BorderLayout());
         todas.setOpaque(false);
-        todas.add(btnTodas, BorderLayout.NORTH);
+        todas.add(botonesFiltro, BorderLayout.NORTH);
         JPanel fila = new JPanel(new BorderLayout(8, 0));
         fila.setOpaque(false);
         fila.add(campos, BorderLayout.CENTER);
@@ -169,6 +176,16 @@ btnAnular = Estilo.peligro("Anular venta");
                 BorderLayout.NORTH);
         getContentPane().add(contenido, BorderLayout.CENTER);
 
+        ActionListener aplicarFiltro = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                refrescar();
+            }
+        };
+        btnBuscar.addActionListener(this);
+        txtNumero.addActionListener(aplicarFiltro);
+        txtDesde.addActionListener(aplicarFiltro);
+        txtHasta.addActionListener(aplicarFiltro);
         btnTodas.addActionListener(this);
         btnBoleta.addActionListener(this);
         btnModificar.addActionListener(this);
@@ -225,18 +242,36 @@ btnAnular = Estilo.peligro("Anular venta");
 
     public void refrescar() {
         modeloVentas.setRowCount(0);
-        ArrayList<Venta> lista;
         String numero = Validador.limpio(txtNumero.getText());
+        String desde = Validador.limpio(txtDesde.getText());
+        String hasta = Validador.limpio(txtHasta.getText());
+        if (!numero.isEmpty() && !Validador.esEntero(numero)) {
+            errorFiltro("El número de venta debe ser numérico.");
+            return;
+        }
+        if (!desde.isEmpty() && !Fecha.esFecha(desde)) {
+            errorFiltro("La fecha 'Desde' no es válida. Use dd/mm/aaaa.");
+            return;
+        }
+        if (!hasta.isEmpty() && !Fecha.esFecha(hasta)) {
+            errorFiltro("La fecha 'Hasta' no es válida. Use dd/mm/aaaa.");
+            return;
+        }
+        LocalDate f1 = Fecha.aFecha(desde);
+        LocalDate f2 = Fecha.aFecha(hasta);
+        if (f1 != null && f2 != null && f1.isAfter(f2)) {
+            errorFiltro("La fecha 'Desde' no puede ser mayor que la fecha 'Hasta'.");
+            return;
+        }
+        ArrayList<Venta> lista;
         if (!numero.isEmpty()) {
             lista = new ArrayList<Venta>();
             Venta v = sis.getVentas().buscar(Validador.entero(numero, -1));
             if (v != null && esVisible(v)) {
                 lista.add(v);
             }
-        } else if (!Validador.vacio(txtDesde.getText()) || !Validador.vacio(txtHasta.getText())) {
-            lista = filtrarPorPerfil(
-                    sis.getVentas().ventasEntre(Validador.limpio(txtDesde.getText()),
-                            Validador.limpio(txtHasta.getText())));
+        } else if (!desde.isEmpty() || !hasta.isEmpty()) {
+            lista = filtrarPorPerfil(sis.getVentas().ventasEntre(desde, hasta));
         } else {
             lista = filtrarPorPerfil(sis.getVentas().todasPorFechaDescendente());
         }
@@ -251,6 +286,11 @@ btnAnular = Estilo.peligro("Anular venta");
         lblTotal.setText(lista.isEmpty()
                 ? "No hay ventas que cumplan el filtro."
                 : lista.size() + " venta(s) · total " + Dinero.soles(sis.getReporte().totalVentas(lista)));
+    }
+
+    private void errorFiltro(String mensaje) {
+        lblTotal.setText(mensaje);
+        limpiarDerecha();
     }
 
     private ArrayList<Venta> filtrarPorPerfil(ArrayList<Venta> lista) {
@@ -403,6 +443,9 @@ modeloDetalle.addRow(new Object[]{
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         switch (cmd) {
+            case "Buscar":
+                refrescar();
+                break;
             case "Ver todas":
                 verTodas();
                 break;

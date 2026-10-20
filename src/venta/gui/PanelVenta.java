@@ -415,7 +415,7 @@ private void quitar() {
                     && indice < detalle.size()) {
 
                 DetalleVenta d = detalle.get(indice);
-                modeloDetalle.setValueAt(d.getCantidad(), indice, 1);
+                modeloDetalle.setValueAt(d.getCantidad(), indice, 2);
                 return d.getCantidad();
             }
             return cantidad;
@@ -426,6 +426,19 @@ private void quitar() {
         if (detalle.isEmpty()) {
             aviso("La venta debe tener al menos un libro en el detalle.");
             return;
+        }
+        for (int i = 0; i < detalle.size(); i++) {
+            DetalleVenta d = detalle.get(i);
+            Libro x = sis.getLibros().buscar(d.getCodigoLibro());
+            if (x == null) {
+                aviso("El libro " + d.getNombreLibro() + " ya no está registrado.");
+                return;
+            }
+            if (d.getCantidad() > x.getStock()) {
+                aviso("No hay stock suficiente de " + d.getNombreLibro()
+                        + ". Disponible: " + x.getStock() + " unidad(es).");
+                return;
+            }
         }
         if (cliente == null && !chkRapida.isSelected()) {
             aviso("Busque un cliente por DNI o marque la opción de venta rápida.");
@@ -471,6 +484,11 @@ aviso("El monto pagado (" + Dinero.soles(pagado)
         Venta v = sis.getVentas().registrar(
                 Sesion.codigo(), dni, new ArrayList<DetalleVenta>(detalle),
                 Fecha.hoy(), Fecha.ahora(), descuento, metodo, pagado);
+        if (v == null) {
+            aviso("No se pudo registrar la venta porque el stock ya no alcanza. "
+                    + "Revise el detalle.");
+            return;
+        }
 
         boolean ok = sis.grabarTodo();
         Cliente c = v.clienteRegistrado() ? sis.getClientes().buscar(v.getDni()) : null;

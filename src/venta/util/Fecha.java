@@ -3,11 +3,14 @@ package venta.util;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 import java.util.Locale;
 
 public final class Fecha {
 
-    public static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    public static final DateTimeFormatter FECHA = DateTimeFormatter
+            .ofPattern("dd/MM/uuuu")
+            .withResolverStyle(ResolverStyle.STRICT);
     public static final DateTimeFormatter HORA = DateTimeFormatter.ofPattern("HH:mm:ss");
     public static final DateTimeFormatter FECHA_LARGA =
             DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es"));

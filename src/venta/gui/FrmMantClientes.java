@@ -49,6 +49,12 @@ public class FrmMantClientes extends JFrame implements ActionListener {
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setSize(new Dimension(1120, 620));
         setLocationRelativeTo(null);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                sis.grabarTodo();
+            }
+        });
 
         txtCodigo = Estilo.soloLectura(10);
         txtDni = Estilo.campo(10);
@@ -187,6 +193,8 @@ public class FrmMantClientes extends JFrame implements ActionListener {
         Cliente x = filtrados.get(tabla.convertRowIndexToModel(fila));
         txtCodigo.setText(String.valueOf(x.getCodigo()));
         txtDni.setText(x.getDni());
+        txtDni.setEditable(false);
+        txtDni.setToolTipText("El DNI no se puede modificar.");
         txtNombres.setText(x.getNombres());
         txtApellidos.setText(x.getApellidos());
         txtCelular.setText(String.valueOf(x.getCelular()));
@@ -197,6 +205,8 @@ public class FrmMantClientes extends JFrame implements ActionListener {
         tabla.clearSelection();
         txtCodigo.setText("");
         txtDni.setText("");
+        txtDni.setEditable(true);
+        txtDni.setToolTipText(null);
         txtNombres.setText("");
         txtApellidos.setText("");
         txtCelular.setText("");

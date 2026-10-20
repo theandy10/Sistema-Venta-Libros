@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -39,8 +40,8 @@ public class FrmReporte extends JFrame implements ActionListener {
     private final Sistema sis;
 
     private final JComboBox<String> cmbTipo;
-    private final JTextField txtDesde;
-    private final JTextField txtHasta;
+    private final SelectorFecha txtDesde;
+    private final SelectorFecha txtHasta;
     private final JTextField txtUmbral;
     private final JLabel lblDesde;
     private final JLabel lblHasta;
@@ -60,15 +61,15 @@ public class FrmReporte extends JFrame implements ActionListener {
         cmbTipo = Estilo.combo(TIPOS);
 
         cmbTipo.setPreferredSize(new Dimension(230, Estilo.ALTO_CAMPO));
-        txtDesde = Estilo.campo(10);
-        txtHasta = Estilo.campo(10);
+        txtDesde = new SelectorFecha(10);
+        txtHasta = new SelectorFecha(10);
         txtUmbral = Estilo.monto(6, true);
         txtUmbral.setText(String.valueOf(Libro.UMBRAL_STOCK_BAJO));
         txtDesde.setText(Fecha.hoy());
         txtHasta.setText(Fecha.hoy());
 
-        lblDesde = Estilo.etiqueta("Desde (dd/mm/aaaa)");
-        lblHasta = Estilo.etiqueta("Hasta (dd/mm/aaaa)");
+        lblDesde = Estilo.etiqueta("Desde");
+        lblHasta = Estilo.etiqueta("Hasta");
         lblUmbral = Estilo.etiqueta("Umbral");
 
         JButton btnGenerar = Estilo.primario("Generar");
@@ -124,8 +125,17 @@ public class FrmReporte extends JFrame implements ActionListener {
                 cambiarReporte();
             }
         });
+        ActionListener aplicarFecha = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if ("Ventas por dia".equals(cmbTipo.getSelectedItem())) {
+                    generar();
+                }
+            }
+        };
+        txtDesde.addActionListener(aplicarFecha);
+        txtHasta.addActionListener(aplicarFecha);
         cambiarReporte();
-        generar();
     }
 
     private static String[] columnas(String tipo) {
@@ -163,6 +173,7 @@ public class FrmReporte extends JFrame implements ActionListener {
         tabla.setModel(modelo);
         Estilo.alinearDerecha(tabla, columnaMonto(tipo));
         lblTotal.setText(" ");
+        generar();
     }
 
     @Override
@@ -221,6 +232,12 @@ public class FrmReporte extends JFrame implements ActionListener {
         }
         if (!hasta.isEmpty() && !Fecha.esFecha(hasta)) {
             Estilo.error(this, "La fecha final no tiene el formato dd/mm/aaaa.");
+            return;
+        }
+        LocalDate f1 = Fecha.aFecha(desde);
+        LocalDate f2 = Fecha.aFecha(hasta);
+        if (f1 != null && f2 != null && f1.isAfter(f2)) {
+            Estilo.error(this, "La fecha inicial no puede ser mayor que la fecha final.");
             return;
         }
         ArrayList<Venta> lista = sis.getReporte().ventasPorDia(desde, hasta);
